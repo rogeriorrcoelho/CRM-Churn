@@ -1,6 +1,7 @@
 -- Para cada data de referência (dtRef), 
 -- contagem de clientes (únicos) que estiveram ativos (possuiram transações) 
 -- nos últimos 28 dias (inclusive)
+-- resultado visual desta consulta pode ser visto na imagem mau-contagem-28dias.jpeg
 
 with tb_daily as (
     select distinct
