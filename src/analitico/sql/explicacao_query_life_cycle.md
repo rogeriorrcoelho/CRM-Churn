@@ -5,13 +5,14 @@
 
 Classificações definidas/mapeadas:
 
-* **Curioso** — `idade < 7` dias desde a primeira interação.
-* **Fiel** — `recência < 7` e `recência anterior < 15` (versão original ambígua; na prática quer-se: último contato recente e penúltimo contato dentro de janela curta).
-* **Turista** — `7 <= recência <= 14` (usuário com recência média).
-* **Desencantado** — `15 <= recência <= 28`.
-* **Zumbi** — `recência > 28`.
-* **Reconquistado** — `recência < 7` e `14 <= recência anterior <= 28`.
-* **Reborn** — `recência < 7` e `recência anterior > 28`.
+* **NOVATO** — `idade < 7` dias desde a primeira interação.
+* **FIEL** — `recência < 7` e `recência anterior < 15` (versão original ambígua; na prática quer-se: último contato recente e penúltimo contato dentro de janela curta).
+* **OCASIONAL** — `7 <= recência <= 14` (usuário com recência média).
+* **DESMOTIVADO** — `15 <= recência <= 28`.
+* **INATIVO** — `recência > 28`.
+* **RECONQUISTADO** — `recência < 7` e `14 <= recência anterior <= 28`.
+* **RETORNADO** — `recência < 7` e `recência anterior > 28`.
+
 
 ---
 
@@ -99,13 +100,13 @@ tb_life_cycle AS (
         t1.*,
         t2.qtdePenultimaTransacao,
         CASE
-            WHEN qtdeDiasPrimTransacao <= 7 THEN '01 - CURIOSO'
+            WHEN qtdeDiasPrimTransacao <= 7 THEN '01 - NOVATO'
             WHEN qtdeDiasUltTransacao <= 7 AND qtdePenultimaTransacao - qtdeDiasUltTransacao <= 14 THEN '02 - FIEL'
-            WHEN qtdeDiasUltTransacao BETWEEN 8 and 14 THEN '03 - TURISTA'
-            WHEN qtdeDiasUltTransacao BETWEEN 15 and 28 THEN '04 - DESENCANTADA'
-            WHEN qtdeDiasUltTransacao > 28 THEN '05 - ZUMBI'
+            WHEN qtdeDiasUltTransacao BETWEEN 8 and 14 THEN '03 - OCASIONAL'
+            WHEN qtdeDiasUltTransacao BETWEEN 15 and 28 THEN '04 - DESMOTIVADO'
+            WHEN qtdeDiasUltTransacao > 28 THEN '05 - INATIVO'
             WHEN qtdeDiasUltTransacao <= 7 AND qtdePenultimaTransacao - qtdeDiasUltTransacao  BETWEEN 15 AND 28 THEN '02 - RECONQUISTADO'
-            WHEN qtdeDiasUltTransacao <= 7 AND qtdePenultimaTransacao - qtdeDiasUltTransacao  > 28 THEN '02 - REBORN'
+            WHEN qtdeDiasUltTransacao <= 7 AND qtdePenultimaTransacao - qtdeDiasUltTransacao  > 28 THEN '02 - RETORNADO'
         END AS descLifeCycle
     FROM tb_idade AS t1
     LEFT JOIN tb_penultima_ativacao AS t2
@@ -126,7 +127,4 @@ tb_life_cycle AS (
 
    * `qtdePenultimaTransacao` será `NULL` quando o cliente tiver apenas uma data em `tb_daily`. As expressões do `CASE` que usam `qtdePenultimaTransacao` produzirão `NULL` na comparação e falharão a condição.
 
-2. **`CURIOSO` vs `FIEL`:**
-
-   * A condição `qtdeDiasPrimTransacao <= 7` marca clientes como `CURIOSO` mesmo que também atendam `FIEL` (por exemplo, um cliente que começou há 3 dias e teve duas visitas dentro de 2 dias). Defina a prioridade: se `curioso` deve significar "novo e ainda sem recorrência", então coloque a verificação de `FIEL` e `RECONQUISTADO/REBORN` antes de `CURIOSO` ou refine a lógica (ex.: `qtdeDiasPrimTransacao <= 7 AND qtdeDiasUltTransacao > 7` para só marcar curioso quem não teve recência imediata).
 
